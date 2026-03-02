@@ -1,0 +1,11 @@
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\bin\Debug\net8.0\HelpDeskHero.Shared.deps.json
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\bin\Debug\net8.0\HelpDeskHero.Shared.dll
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\bin\Debug\net8.0\HelpDeskHero.Shared.pdb
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.AssemblyInfoInputs.cache
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.AssemblyInfo.cs
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.csproj.CoreCompileInputs.cache
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.dll
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\refint\HelpDeskHero.Shared.dll
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\HelpDeskHero.Shared.pdb
+C:\Users\tomas\Desktop\studia\ZadaniaProgramowanie\01_HelpDeskHero\src\HelpDeskHero.Shared\obj\Debug\net8.0\ref\HelpDeskHero.Shared.dll
