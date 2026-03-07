@@ -1,0 +1,62 @@
+@page "/tickets"
+@attribute [Authorize]
+@using HelpDeskHero.Shared.Contracts.Tickets
+@inject HelpDeskHero.UI.Services.Api.TicketApiClient TicketApi
+@inject NavigationManager Nav
+
+<PageTitle>Tickets</PageTitle>
+
+<h3>Tickets</h3>
+
+<p>
+    <button @onclick='() => Nav.NavigateTo("/tickets/create")'>Nowe zgłoszenie</button>
+</p>
+
+@if (_isLoading)
+{
+    <p>Ładowanie...</p>
+}
+else if (_tickets.Count == 0)
+{
+    <p>Brak zgłoszeń.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ticket in _tickets)
+            {
+                <tr>
+                    <td>@ticket.Number</td>
+                    <td>@ticket.Title</td>
+                    <td>@ticket.Status</td>
+                    <td>@ticket.Priority</td>
+                    <td>
+                        <button @onclick='() => Nav.NavigateTo($"/tickets/{ticket.Id}")'>Szczegóły</button>
+                        <button @onclick='() => Nav.NavigateTo($"/tickets/edit/{ticket.Id}")'>Edytuj</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private bool _isLoading = true;
+    private List<TicketDto> _tickets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _tickets = (await TicketApi.GetAllAsync()).ToList();
+        _isLoading = false;
+    }
+}

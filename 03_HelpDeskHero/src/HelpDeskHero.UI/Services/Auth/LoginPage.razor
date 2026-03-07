@@ -1,0 +1,73 @@
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@attribute [AllowAnonymous]
+@inject HelpDeskHero.UI.Services.Api.AuthApiClient AuthApi
+@inject HelpDeskHero.UI.Services.Auth.AuthSessionService AuthSession
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<h3>Logowanie</h3>
+
+<EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div style="margin-bottom: 12px;">
+		<label>Login</label><br />
+		<InputText @bind-Value="_model.UserName" />
+		<ValidationMessage For="@(() => _model.UserName)" />
+	</div>
+
+	<div style="margin-bottom: 12px;">
+		<label>Hasło</label><br />
+		<InputText type="password" @bind-Value="_model.Password" />
+		<ValidationMessage For="@(() => _model.Password)" />
+	</div>
+
+	@if (!string.IsNullOrWhiteSpace(_error))
+	{
+		<p style="color: red;">@_error</p>
+	}
+
+	<button type="submit" disabled="@_busy">Zaloguj</button>
+</EditForm>
+
+@code {
+	private bool _busy;
+	private string? _error;
+	private LoginVm _model = new();
+
+	private async Task HandleLoginAsync()
+	{
+		_busy = true;
+		_error = null;
+
+		var result = await AuthApi.LoginAsync(new HelpDeskHero.Shared.Contracts.Auth.LoginRequestDto
+		{
+			UserName = _model.UserName,
+			Password = _model.Password
+		});
+
+		if (result is null)
+		{
+			_error = "Niepoprawny login lub hasło.";
+			_busy = false;
+			return;
+		}
+
+		await AuthSession.LoginAsync(result);
+		_busy = false;
+
+		Navigation.NavigateTo("/tickets");
+	}
+
+	private sealed class LoginVm
+	{
+		[Required]
+		public string UserName { get; set; } = string.Empty;
+
+		[Required]
+		public string Password { get; set; } = string.Empty;
+	}
+}
