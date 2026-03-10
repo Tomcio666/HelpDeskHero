@@ -1,0 +1,43 @@
+using HelpDeskHero.UI;
+using HelpDeskHero.UI.Services.Api;
+using HelpDeskHero.UI.Services.Auth;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+
+var apiBaseUrl = builder.Configuration["Api:BaseUrl"]
+    ?? throw new InvalidOperationException("Missing Api:BaseUrl.");
+
+builder.Services.AddAuthorizationCore();
+
+builder.Services.AddScoped<TokenStore>();
+builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthHttpMessageHandler>();
+
+builder.Services.AddHttpClient("AnonymousApi", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+builder.Services.AddHttpClient("Api", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+})
+.AddHttpMessageHandler<AuthHttpMessageHandler>();
+
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+builder.Services.AddScoped<AuthApiClient>();
+builder.Services.AddScoped<TicketApiClient>();
+builder.Services.AddScoped<DashboardApiClient>();
+builder.Services.AddScoped<AuditApiClient>();
+builder.Services.AddScoped<TicketCommentApiClient>();
+builder.Services.AddScoped<TicketAttachmentApiClient>();
+builder.Services.AddScoped<NotificationApiClient>();
+
+await builder.Build().RunAsync();

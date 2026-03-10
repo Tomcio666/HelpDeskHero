@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Launch API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-all",
+      "program": "${workspaceFolder}/src/HelpDeskHero.Api/bin/Debug/net8.0/HelpDeskHero.Api.dll",
+      "cwd": "${workspaceFolder}/src/HelpDeskHero.Api",
+      "stopAtEntry": false
+    }
+  ]
+}

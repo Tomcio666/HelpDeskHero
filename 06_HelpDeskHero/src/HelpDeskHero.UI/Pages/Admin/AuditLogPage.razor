@@ -1,0 +1,90 @@
+@page "/admin/audit"
+@attribute [Authorize(Roles = "Admin")]
+@using HelpDeskHero.Shared.Contracts.Audit
+@inject HelpDeskHero.UI.Services.Api.AuditApiClient AuditApi
+
+<h3>Audit log</h3>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-2">
+        <InputText class="form-control" @bind-Value="_action" placeholder="Action" />
+    </div>
+    <div class="col-md-2">
+        <InputText class="form-control" @bind-Value="_entityName" placeholder="Entity" />
+    </div>
+    <div class="col-md-2">
+        <InputText class="form-control" @bind-Value="_performedBy" placeholder="Performed by" />
+    </div>
+    <div class="col-md-2">
+        <InputDate class="form-control" @bind-Value="_fromUtc" />
+    </div>
+    <div class="col-md-2">
+        <InputDate class="form-control" @bind-Value="_toUtc" />
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-primary w-100" @onclick="ReloadAsync">Szukaj</button>
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-outline-secondary w-100" @onclick="ClearAsync">Wyczyść</button>
+    </div>
+</div>
+
+@if (_items is null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>When</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>User</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _items)
+            {
+                <tr>
+                    <td>@item.CreatedAtUtc.ToString("u")</td>
+                    <td>@item.Action</td>
+                    <td>@item.EntityName</td>
+                    <td>@item.PerformedBy</td>
+                    <td>@item.Details</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string? _action;
+    private string? _entityName;
+    private string? _performedBy;
+    private DateTime? _fromUtc;
+    private DateTime? _toUtc;
+    private IReadOnlyList<AuditLogListItemDto>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _items = await AuditApi.GetAsync(_action, _entityName, _performedBy, _fromUtc, _toUtc);
+    }
+
+    private async Task ClearAsync()
+    {
+        _action = null;
+        _entityName = null;
+        _performedBy = null;
+        _fromUtc = null;
+        _toUtc = null;
+        await ReloadAsync();
+    }
+}
