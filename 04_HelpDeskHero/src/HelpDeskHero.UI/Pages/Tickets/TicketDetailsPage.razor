@@ -1,0 +1,59 @@
+@page "/tickets/{Id:int}"
+@attribute [Authorize]
+
+@inject HelpDeskHero.UI.Services.Api.TicketApiClient TicketApi
+@inject NavigationManager Nav
+
+<h3>Szczegóły zgłoszenia</h3>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_ticket is null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@_ticket.Title</h5>
+            <h6 class="card-subtitle mb-2 text-muted">@_ticket.Number</h6>
+
+            <p><strong>Status:</strong> @_ticket.Status</p>
+            <p><strong>Priorytet:</strong> @_ticket.Priority</p>
+            <p><strong>Utworzono:</strong> @_ticket.CreatedAtUtc.ToLocalTime()</p>
+            <p><strong>Opis:</strong></p>
+            <p>@_ticket.Description</p>
+
+            <div class="d-flex gap-2">
+                <a class="btn btn-primary" href="@($"/tickets/edit/{_ticket.Id}")">Edytuj</a>
+                <button class="btn btn-secondary" @onclick="GoBack">Powrót</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private TicketDto? _ticket;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _error = null;
+        _ticket = await TicketApi.GetByIdAsync(Id);
+
+        if (_ticket is null)
+        {
+            _error = "Nie znaleziono zgłoszenia.";
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/tickets");
+    }
+}
