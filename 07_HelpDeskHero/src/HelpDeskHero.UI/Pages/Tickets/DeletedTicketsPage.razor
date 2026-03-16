@@ -1,0 +1,80 @@
+@page "/tickets/deleted"
+@attribute [Authorize(Roles = "Admin,Agent")]
+@inject HelpDeskHero.UI.Services.Api.TicketApiClient TicketApi
+
+<h3>Usunięte zgłoszenia</h3>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_items is null)
+{
+    <p>Ładowanie...</p>
+}
+else if (_items.Count == 0)
+{
+    <p>Brak usuniętych zgłoszeń.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Tytuł</th>
+                <th>Status</th>
+                <th>Priorytet</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _items)
+            {
+                <tr>
+                    <td>@item.Number</td>
+                    <td>@item.Title</td>
+                    <td>@item.Status</td>
+                    <td>@item.Priority</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" @onclick="() => RestoreAsync(item.Id)">Restore</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<TicketDto>? _items;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _error = null;
+        _items = await TicketApi.GetDeletedAsync();
+
+        if (_items is null)
+        {
+            _error = "Nie udało się pobrać usuniętych zgłoszeń.";
+        }
+    }
+
+    private async Task RestoreAsync(int id)
+    {
+        var response = await TicketApi.RestoreAsync(id);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _error = "Nie udało się przywrócić zgłoszenia.";
+            return;
+        }
+
+        await ReloadAsync();
+    }
+}

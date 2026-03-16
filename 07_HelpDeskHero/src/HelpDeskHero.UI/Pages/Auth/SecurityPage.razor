@@ -1,0 +1,46 @@
+@page "/security"
+@attribute [Authorize]
+@inject HelpDeskHero.UI.Services.Api.AuthApiClient AuthApi
+@inject NavigationManager Nav
+
+<h3>Bezpieczeństwo konta</h3>
+
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div class="alert alert-info">@_message</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+<button class="btn btn-danger" disabled="@_busy" @onclick="RevokeAllAsync">
+    Wyloguj wszystkie urządzenia
+</button>
+
+@code {
+    private bool _busy;
+    private string? _message;
+    private string? _error;
+
+    private async Task RevokeAllAsync()
+    {
+        _busy = true;
+        _message = null;
+        _error = null;
+
+        var ok = await AuthApi.RevokeAllSessionsAsync();
+
+        _busy = false;
+
+        if (!ok)
+        {
+            _error = "Nie udało się wylogować wszystkich sesji.";
+            return;
+        }
+
+        _message = "Wszystkie sesje zostały unieważnione.";
+        Nav.NavigateTo("/login", true);
+    }
+}

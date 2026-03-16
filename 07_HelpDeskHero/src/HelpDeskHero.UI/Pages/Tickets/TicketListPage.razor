@@ -1,0 +1,145 @@
+@page "/tickets"
+@attribute [Authorize]
+@implements IAsyncDisposable
+
+@using HelpDeskHero.Shared.Contracts.Common
+@using HelpDeskHero.Shared.Contracts.Tickets
+@inject HelpDeskHero.UI.Services.Api.TicketApiClient TicketApi
+@inject HelpDeskHero.UI.Services.Realtime.TicketsRealtimeClient Realtime
+@inject NavigationManager Nav
+
+<h3>Zgłoszenia</h3>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-4">
+        <InputText class="form-control" @bind-Value="_query.Search" placeholder="Szukaj..." />
+    </div>
+    <div class="col-md-2">
+        <InputSelect class="form-select" @bind-Value="_query.Status">
+            <option value="">Wszystkie statusy</option>
+            <option value="New">New</option>
+            <option value="InProgress">InProgress</option>
+            <option value="Closed">Closed</option>
+        </InputSelect>
+    </div>
+    <div class="col-md-2">
+        <InputSelect class="form-select" @bind-Value="_query.Priority">
+            <option value="">Wszystkie priorytety</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </InputSelect>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" @onclick="ReloadAsync">Filtruj</button>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" @onclick="ExportCsv">Export CSV</button>
+    </div>
+</div>
+
+@if (_result is null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <p>Łącznie: @_result.TotalCount</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Tytuł</th>
+                <th>Status</th>
+                <th>Priorytet</th>
+                <th>Assigned</th>
+                <th>Due resolve</th>
+                <th>Escalation</th>
+                <th>Utworzono</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _result.Items)
+            {
+                <tr>
+                    <td>@item.Number</td>
+                    <td><a href="@($"/tickets/{item.Id}")">@item.Title</a></td>
+                    <td>@item.Status</td>
+                    <td>@item.Priority</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>@item.CreatedAtUtc.ToLocalTime()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" disabled="@(_query.PageNumber <= 1)" @onclick="PrevAsync">Poprzednia</button>
+        <span>Strona @_query.PageNumber</span>
+        <button class="btn btn-outline-secondary"
+                disabled="@((_query.PageNumber * _query.PageSize) >= _result.TotalCount)"
+                @onclick="NextAsync">
+            Następna
+        </button>
+    </div>
+}
+
+@code {
+    private TicketQueryDto _query = new();
+    private PagedResultDto<TicketDto>? _result;
+    private bool _realtimeStarted;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Realtime.OnTicketChanged += HandleTicketChangedAsync;
+
+        if (!_realtimeStarted)
+        {
+            await Realtime.StartAsync();
+            _realtimeStarted = true;
+        }
+
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _result = await TicketApi.GetPageAsync(_query);
+    }
+
+    private async Task PrevAsync()
+    {
+        if (_query.PageNumber > 1)
+        {
+            _query.PageNumber--;
+            await ReloadAsync();
+        }
+    }
+
+    private async Task NextAsync()
+    {
+        _query.PageNumber++;
+        await ReloadAsync();
+    }
+
+    private void ExportCsv()
+    {
+        var url = TicketApi.GetExportUrl(_query.Status, _query.Priority);
+        Nav.NavigateTo(url, true);
+    }
+
+    private async Task HandleTicketChangedAsync(TicketLiveUpdateDto dto)
+    {
+        await ReloadAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Realtime.OnTicketChanged -= HandleTicketChangedAsync;
+        await Realtime.DisposeAsync();
+    }
+}
